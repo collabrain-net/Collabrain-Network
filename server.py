@@ -4,7 +4,7 @@ import threading
 
 # Connection Data
 host = '127.0.0.1'
-port = 55555
+port = 55553
 
 # Starting Server
 # the socket is of the type Internet socket and is  using TCP
@@ -30,8 +30,15 @@ def handle(client):
     while True:
         try:
             # Broadcasting Messages
-            message = client.recv(1024)
-            broadcast(message)
+            header = client.recv(1)
+
+            if header == b'M':
+                message = client.recv(1024)
+                broadcast(message)
+            else:
+                print("Errror header: ",header)
+            # message = client.recv(1024)
+            # broadcast(message)
         except:
             # Removing And Closing Clients
             index = clients.index(client)
@@ -45,13 +52,17 @@ def handle(client):
 
 # Receiving / Listening Function
 def receive():
+    print("""
+            █▀▀ █▀▀█ █░░ █░░ █▀▀█ █▀▀▄ █▀▀█ █▀▀█ ░▀░ █▀▀▄ 
+            █░░ █░░█ █░░ █░░ █▄▄█ █▀▀▄ █▄▄▀ █▄▄█ ▀█▀ █░░█ 
+            ▀▀▀ ▀▀▀▀ ▀▀▀ ▀▀▀ ▀░░▀ ▀▀▀░ ▀░▀▀ ▀░░▀ ▀▀▀ ▀░░▀ """)
     while True:
         # Accept Connection
         client, address = server.accept()
         print("Connected with {}".format(str(address)))
 
         # Request And Store Nickname
-        client.send('NICK'.encode('ascii'))
+        client.send('OK'.encode('ascii'))
         nickname = client.recv(1024).decode('ascii')
         nicknames.append(nickname)
         clients.append(client)
@@ -66,10 +77,9 @@ def receive():
         thread.start()
 
 
+#start server
 receive()
 
 
 
 
-
-print("Collabrain aims to democratize AI training, empowering individuals")
