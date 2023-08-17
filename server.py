@@ -4,7 +4,7 @@ import threading
 
 # Connection Data
 host = '127.0.0.1'
-port = 55553
+port = 55555
 
 # Starting Server
 # the socket is of the type Internet socket and is  using TCP
@@ -30,13 +30,30 @@ def handle(client):
     while True:
         try:
             # Broadcasting Messages
-            header = client.recv(1)
+            protocol = client.recv(1)
 
-            if header == b'M':
+            if protocol == b'M':
                 message = client.recv(1024)
                 broadcast(message)
+            elif protocol == b'F':
+                fileData = b''
+                totalChunks = int(client.recv(9).decode('ascii'))
+                print("Total Chunks:", totalChunks)
+                for i in range(totalChunks):
+                    chunkSize = int(client.recv(12).decode('ascii'))
+                    # print("Receiving Chunk", i, "Chunk Size:", chunkSize)
+                    chunk = client.recv(chunkSize)
+                    print("Receiving Chunk", i, "Chunk Size:", chunkSize)
+                    # print("receiving <- ", i)
+                    fileData += chunk
+
+                #save file in server
+                with open("./new_file.jpg", 'wb') as file:
+                    file.write(fileData)
+                    print("File saved")
+
             else:
-                print("Errror header: ",header)
+                print("Errror header: ",protocol)
             # message = client.recv(1024)
             # broadcast(message)
         except:
